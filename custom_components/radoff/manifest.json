@@ -2,7 +2,6 @@
   "domain": "radoff",
   "name": "Radoff",
   "codeowners": ["@raelix"],
-  "dependencies": [],
   "config_flow": true,
   "documentation": "https://github.com/raelix/ha-radoff-integration",
   "integration_type": "hub",
