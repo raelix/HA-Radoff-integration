@@ -42,8 +42,7 @@ Select the device you want to add.
 - ```pool_region```
 
 ### Dev
-If you want to test out the integration just open it with [devcontainer](vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https%3A%2F%2Fgithub.com%2Fraelix%2Fha-radoff-integration)
-
+If you want to test out the integration just open it with [![VS Code Container](https://img.shields.io/static/v1?label=VS+Code&message=Container&logo=visualstudiocode&color=007ACC&logoColor=007ACC&labelColor=2C2C32)](vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https%3A%2F%2Fgithub.com%2Fraelix%2Fha-radoff-integration)
 ### Warnings
 
 Please do not use this against the real Radoff APIs as they are not intended to be exposed so I'm not responsible for any wrong use of this repository.
