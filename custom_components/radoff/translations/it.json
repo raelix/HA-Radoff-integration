@@ -1,0 +1,40 @@
+{
+    "entity": {
+        "sensor": {
+          "internal_temperature": {
+              "name": "Temperatura"
+          },
+          "relative_humidity": {
+              "name": "Umidità"
+          },
+          "pressure": {
+              "name": "Pressione"
+          },
+          "eco2": {
+              "name": "Anidride carbonica"
+          },
+          "airqualityindex": {
+              "name": "Qualità aria"
+          }
+        }
+    },
+    "config": {
+        "abort": {
+            "already_configured": "Dispositivo gia configurato"
+        },
+        "error": {
+            "cannot_connect": "Connessione fallita",
+            "invalid_auth": "Autenticazione fallita",
+            "unknown": "Errore inatteso"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "client_id": "Client ID",
+                    "password": "Password",
+                    "username": "Nome Utente"
+                }
+            }
+        }
+    }
+}

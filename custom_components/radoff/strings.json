@@ -1,0 +1,42 @@
+{
+  "entity": {
+    "sensor": {
+      "internal_temperature": {
+        "name": "Temperature"
+      },
+      "relative_humidity": {
+        "name": "Humidity"
+      },
+      "pressure": {
+        "name": "Pressure"
+      },
+      "airqualityindex": {
+        "name": "Air Quality"
+      },
+      "eco2": {
+        "name": "Co2"
+      }
+    }
+  },
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "client_id": "Client ID",
+          "pool_id": "Pool ID",
+          "pool_region": "Pool Region",
+          "username": "Username",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+      "unknown": "[%key:common::config_flow::error::unknown%]"
+    },
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+    }
+  }
+}

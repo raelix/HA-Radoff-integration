@@ -1,0 +1,42 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Device is already configured"
+        },
+        "error": {
+            "cannot_connect": "Failed to connect",
+            "invalid_auth": "Invalid authentication",
+            "unknown": "Unexpected error"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "client_id": "Client ID",
+                    "password": "Password",
+                    "pool_id": "Pool ID",
+                    "pool_region": "Pool Region",
+                    "username": "Username"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "airqualityindex": {
+                "name": "Air Quality"
+            },
+            "eco2": {
+                "name": "Co2"
+            },
+            "internal_temperature": {
+                "name": "Temperature"
+            },
+            "pressure": {
+                "name": "Pressure"
+            },
+            "relative_humidity": {
+                "name": "Humidity"
+            }
+        }
+    }
+}

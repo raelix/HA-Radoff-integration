@@ -1,0 +1,17 @@
+{
+  "domain": "radoff",
+  "name": "Radoff",
+  "codeowners": ["@raelix"],
+  "version": "0.0.1",
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/raelix/ha-radoff-integration",
+  "issue_tracker": "https://github.com/raelix/ha-radoff-integration/issues",
+  "homekit": {},
+  "integration_type": "device",
+  "iot_class": "cloud_polling",
+  "requirements": ["pycognito==2024.5.1"],
+  "single_config_entry": false,
+  "ssdp": [],
+  "zeroconf": []
+}
