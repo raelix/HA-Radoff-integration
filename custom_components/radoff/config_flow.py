@@ -13,7 +13,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 
 from .api import API
-from .const import CONF_POOL_ID, CONF_POOL_REGION, DOMAIN
+from .const import CONF_POOL_ID, CONF_POOL_REGION, DOMAIN, CONF_INDEX
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -25,6 +25,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
         vol.Required(CONF_CLIENT_ID): str,
         vol.Required(CONF_POOL_ID): str,
         vol.Required(CONF_POOL_REGION): str,
+        vol.Required(CONF_INDEX, default=True): bool,
     }
 )
 

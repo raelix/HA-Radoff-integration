@@ -1,43 +1,114 @@
 {
-    "entity": {
-        "sensor": {
-          "internal_temperature": {
-              "name": "Temperatura"
-          },
-          "relative_humidity": {
-              "name": "Umidità"
-          },
-          "pressure": {
-              "name": "Pressione"
-          },
-          "eco2": {
-              "name": "Anidride carbonica"
-          },
-          "tvoc": {
-            "name": "VOCs"
-          },
-          "airqualityindex": {
-              "name": "Qualità aria"
-          }
+  "entity": {
+    "sensor": {
+      "internal_temperature": {
+        "name": "Temperatura"
+      },
+      "relative_humidity": {
+        "name": "Umidità"
+      },
+      "pressure": {
+        "name": "Pressione"
+      },
+      "eco2": {
+        "name": "Anidride carbonica"
+      },
+      "tvoc": {
+        "name": "VOCs"
+      },
+      "airqualityindex": {
+        "name": "Qualità aria"
+      },
+      "internal_temperature_index": {
+        "name": "Temperatura Indice",
+        "state": {
+          "excellent": "Ottimo",
+          "good": "Buono",
+          "medium": "Medio",
+          "poor": "Scarso",
+          "terrible": "Alto"
         }
-    },
-    "config": {
-        "abort": {
-            "already_configured": "Dispositivo gia configurato"
-        },
-        "error": {
-            "cannot_connect": "Connessione fallita",
-            "invalid_auth": "Autenticazione fallita",
-            "unknown": "Errore inatteso"
-        },
-        "step": {
-            "user": {
-                "data": {
-                    "client_id": "Client ID",
-                    "password": "Password",
-                    "username": "Nome Utente"
-                }
-            }
+      },
+      "relative_humidity_index": {
+        "name": "Umidità Indice",
+        "state": {
+          "excellent": "Ottimo",
+          "good": "Buono",
+          "medium": "Medio",
+          "poor": "Scarso",
+          "terrible": "Alto"
         }
+      },
+      "tvoc_index": {
+        "name": "VOCs Indice",
+        "state": {
+          "excellent": "Ottimo",
+          "good": "Buono",
+          "medium": "Medio",
+          "poor": "Scarso",
+          "terrible": "Pessimo"
+        }
+      },
+      "eco2_index": {
+        "name": "CO2 Indice",
+        "state": {
+          "excellent": "Ottimo",
+          "good": "Buono",
+          "medium": "Medio",
+          "poor": "Scarso",
+          "terrible": "Pessimo"
+        }
+      },
+      "pm10_index": {
+        "name": "PM10 Indice",
+        "state": {
+          "excellent": "Ottimo",
+          "good": "Buono",
+          "medium": "Medio",
+          "poor": "Scarso",
+          "terrible": "Pessimo"
+        }
+      },
+      "pm25_index": {
+        "name": "PM2.5 Indice",
+        "state": {
+          "excellent": "Ottimo",
+          "good": "Buono",
+          "medium": "Medio",
+          "poor": "Scarso",
+          "terrible": "Pessimo"
+        }
+      },
+      "pm1_index": {
+        "name": "PM1 Indice",
+        "state": {
+          "excellent": "Ottimo",
+          "good": "Buono",
+          "medium": "Medio",
+          "poor": "Scarso",
+          "terrible": "Pessimo"
+        }
+      }
     }
+  },
+  "config": {
+    "abort": {
+      "already_configured": "Dispositivo gia configurato"
+    },
+    "error": {
+      "cannot_connect": "Connessione fallita",
+      "invalid_auth": "Autenticazione fallita",
+      "unknown": "Errore inatteso"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "client_id": "Client ID",
+          "password": "Password",
+          "username": "Nome Utente",
+          "generate_index": "Genera indici entità"
+        }
+      }
+    }
+  }
 }

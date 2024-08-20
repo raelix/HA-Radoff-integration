@@ -16,7 +16,7 @@ from homeassistant.core import DOMAIN as HOMEASSISTANT_DOMAIN, HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import API, APIAuthError, Device
-from .const import CONF_POOL_ID, CONF_POOL_REGION, DEFAULT_SCAN_INTERVAL
+from .const import CONF_POOL_ID, CONF_POOL_REGION, DEFAULT_SCAN_INTERVAL, CONF_INDEX
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -26,6 +26,7 @@ class APIData(dict[str, Any]):
     """Class to hold api data."""
 
     controller_name: str
+    generate_index: bool
     devices: list[Device]
 
 
@@ -42,6 +43,7 @@ class RadoffCoordinator(DataUpdateCoordinator):
         self.password = config_entry.data[CONF_PASSWORD]
         self.pool_id = config_entry.data[CONF_POOL_ID]
         self.pool_region = config_entry.data[CONF_POOL_REGION]
+        self.generate_index = config_entry.data.get(CONF_INDEX, True)
 
         self.poll_interval = config_entry.options.get(
             CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
@@ -78,7 +80,11 @@ class RadoffCoordinator(DataUpdateCoordinator):
         except Exception as err:
             raise UpdateFailed(f"Error communicating with API: {err}") from err
 
-        return APIData(self.api.controller_name, devices)
+        return APIData(
+            controller_name=self.api.controller_name,
+            devices=devices,
+            generate_index=self.generate_index,
+        )
 
     def get_device_by_id(self, device_type: str, device_id: str) -> Device | None:
         """Return device by device id."""

@@ -1,45 +1,116 @@
 {
-    "config": {
-        "abort": {
-            "already_configured": "Device is already configured"
-        },
-        "error": {
-            "cannot_connect": "Failed to connect",
-            "invalid_auth": "Invalid authentication",
-            "unknown": "Unexpected error"
-        },
-        "step": {
-            "user": {
-                "data": {
-                    "client_id": "Client ID",
-                    "password": "Password",
-                    "pool_id": "Pool ID",
-                    "pool_region": "Pool Region",
-                    "username": "Username"
-                }
-            }
-        }
+  "config": {
+    "abort": {
+      "already_configured": "Device is already configured"
     },
-    "entity": {
-        "sensor": {
-            "airqualityindex": {
-                "name": "Air Quality"
-            },
-            "eco2": {
-                "name": "Co2"
-            },
-            "internal_temperature": {
-                "name": "Temperature"
-            },
-            "pressure": {
-                "name": "Pressure"
-            },
-            "tvoc": {
-              "name": "VOCs"
-            },
-            "relative_humidity": {
-                "name": "Humidity"
-            }
+    "error": {
+      "cannot_connect": "Failed to connect",
+      "invalid_auth": "Invalid authentication",
+      "unknown": "Unexpected error"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "client_id": "Client ID",
+          "password": "Password",
+          "pool_id": "Pool ID",
+          "pool_region": "Pool Region",
+          "username": "Username",
+          "generate_index": "Generates Index Entities"
         }
+      }
     }
+  },
+  "entity": {
+    "sensor": {
+      "airqualityindex": {
+        "name": "Air Quality"
+      },
+      "eco2": {
+        "name": "Co2"
+      },
+      "internal_temperature": {
+        "name": "Temperature"
+      },
+      "pressure": {
+        "name": "Pressure"
+      },
+      "tvoc": {
+        "name": "VOCs"
+      },
+      "relative_humidity": {
+        "name": "Humidity"
+      },
+      "internal_temperature_index": {
+        "name": "Temperature Index",
+        "state": {
+          "excellent": "Excellent",
+          "good": "Good",
+          "medium": "Medium",
+          "poor": "Poor",
+          "terrible": "Terrible"
+        }
+      },
+      "relative_humidity_index": {
+        "name": "Humidity Index",
+        "state": {
+          "excellent": "Excellent",
+          "good": "Good",
+          "medium": "Medium",
+          "poor": "Poor",
+          "terrible": "Terrible"
+        }
+      },
+      "tvoc_index": {
+        "name": "VOCs Index",
+        "state": {
+          "excellent": "Excellent",
+          "good": "Good",
+          "medium": "Medium",
+          "poor": "Poor",
+          "terrible": "Terrible"
+        }
+      },
+      "eco2_index": {
+        "name": "CO2 Index",
+        "state": {
+          "excellent": "Excellent",
+          "good": "Good",
+          "medium": "Medium",
+          "poor": "Poor",
+          "terrible": "Terrible"
+        }
+      },
+      "pm10_index": {
+        "name": "PM10 Index",
+        "state": {
+          "excellent": "Excellent",
+          "good": "Good",
+          "medium": "Medium",
+          "poor": "Poor",
+          "terrible": "Terrible"
+        }
+      },
+      "pm25_index": {
+        "name": "PM2.5 Index",
+        "state": {
+          "excellent": "Excellent",
+          "good": "Good",
+          "medium": "Medium",
+          "poor": "Poor",
+          "terrible": "Terrible"
+        }
+      },
+      "pm1_index": {
+        "name": "PM1 Index",
+        "state": {
+          "excellent": "Excellent",
+          "good": "Good",
+          "medium": "Medium",
+          "poor": "Poor",
+          "terrible": "Terrible"
+        }
+      }
+    }
+  }
 }
