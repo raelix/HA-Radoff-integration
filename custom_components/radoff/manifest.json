@@ -1,13 +1,14 @@
 {
   "domain": "radoff",
   "name": "Radoff",
-  "codeowners": ["@raelix"],
+  "codeowners": [
+    "@raelix"
+  ],
   "config_flow": true,
   "documentation": "https://github.com/raelix/ha-radoff-integration",
   "integration_type": "hub",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/raelix/ha-radoff-integration/issues",
-  "requirements": ["pycognito==2024.5.1"],
   "single_config_entry": false,
   "version": "0.0.1"
 }
