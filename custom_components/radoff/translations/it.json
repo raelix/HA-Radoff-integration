@@ -13,6 +13,9 @@
           "eco2": {
               "name": "Anidride carbonica"
           },
+          "tvoc": {
+            "name": "VOCs"
+          },
           "airqualityindex": {
               "name": "Qualità aria"
           }

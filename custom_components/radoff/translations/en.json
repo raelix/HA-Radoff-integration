@@ -34,6 +34,9 @@
             "pressure": {
                 "name": "Pressure"
             },
+            "tvoc": {
+              "name": "VOCs"
+            },
             "relative_humidity": {
                 "name": "Humidity"
             }

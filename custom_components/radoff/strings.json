@@ -15,6 +15,9 @@
       },
       "eco2": {
         "name": "Co2"
+      },
+      "tvoc": {
+        "name": "VOCs"
       }
     }
   },
