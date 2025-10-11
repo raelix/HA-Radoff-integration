@@ -9,6 +9,8 @@ from typing import Any
 
 from pycognito.aws_srp import AWSSRP
 import requests
+from requests.adapters import HTTPAdapter, Retry
+import time
 
 from homeassistant.components.sensor import DEVICE_CLASS_UNITS, SensorDeviceClass
 from homeassistant.const import UnitOfPressure, UnitOfTemperature
@@ -107,7 +109,7 @@ class API:
 
     BASE_DOMAIN = "https://api.iot.radoff.life/api/v1/core"
     PARENT_DOMAIN = "94e966f9-e0b2-11ec-a450-02ab88ac9cd7"
-    DEFAULT_TIMEOUT = 50
+    DEFAULT_TIMEOUT = (10, 30)
 
     def __init__(
         self,
@@ -126,6 +128,36 @@ class API:
         self.connected: bool = False
         self.domain: str = ""
         self.tokens: dict = {}
+        self._token_expires_at: float = 0
+
+        self.session = self._create_session()
+
+    def _create_session(self) -> requests.Session:
+        """Create a requests session"""
+        session = requests.Session()
+
+        retry_strategy = Retry(
+            total=3, 
+            backoff_factor=0.5,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=["GET", "POST"],
+        )
+
+        adapter = HTTPAdapter(
+            pool_connections=1,
+            pool_maxsize=2,
+            max_retries=retry_strategy,
+        )
+
+        # For all URLs starting with https:// use this adapter
+        session.mount("https://", adapter)
+        return session
+
+    def _is_token_expired(self) -> bool:
+        """Check if current token is expired or will expire soon."""
+        if not self.tokens:
+            return True
+        return time.time() >= (self._token_expires_at - 300)
 
     @property
     def controller_name(self) -> str:
@@ -135,6 +167,7 @@ class API:
     def connect(self) -> bool:
         """Connect to api."""
         if self.username != "" and self.password != "" and self.client_id != "":
+            _LOGGER.debug("Authenticating with AWS Cognito...")
             connection = AWSSRP(
                 username=self.username,
                 password=self.password,
@@ -145,10 +178,16 @@ class API:
             auth_data = connection.authenticate_user()
             if auth_data is not None and "AuthenticationResult" in auth_data:
                 self.tokens = auth_data["AuthenticationResult"]
+
+                expires_in = self.tokens.get("ExpiresIn", 3600)
+                self._token_expires_at = time.time() + expires_in
+                _LOGGER.info("Token will expire in %d seconds", expires_in)
+
                 self.connected = True
                 domain = self._get_domain(self._get_bearer_token())
                 if domain is not None and domain != "":
                     self.domain = domain
+                    _LOGGER.info("Successfully connected to Radoff API, domain: %s", domain)
                 else:
                     raise DomainNotFoundError("Error domain not found.")
             return True
@@ -156,19 +195,33 @@ class API:
 
     def disconnect(self) -> bool:
         """Disconnect from api."""
+        _LOGGER.debug("Disconnecting from API")
         self.connected = False
         self.tokens = {}
         self.domain = ""
+        self._token_expires_at = 0
+
+        # Close and recreate session
+        if self.session:
+            self.session.close()
+            self.session = self._create_session()
+
         return True
 
     def get_devices(self) -> list[Device]:
         """Get devices on api."""
+        # Check if token needs refresh
+        if self._is_token_expired():
+            _LOGGER.info("Token expired, reconnecting...")
+            self.disconnect()
+            self.connect()
+
         device_list: list[Device] = []
 
         url = f"{self.BASE_DOMAIN}/data/devices/search"
         post_obj = {"filter": {}, "take": 99}
 
-        response = requests.post(
+        response = self.session.post(
             url,
             headers=self._get_headers(
                 bearer_token=self._get_bearer_token(), x_domain=self.domain
@@ -177,9 +230,10 @@ class API:
             timeout=self.DEFAULT_TIMEOUT,
         )
 
-        self._check_response_status(response=response)
+        self._check_response_status(response=response, url=url)
 
         devices = response.json()["devices"]
+        _LOGGER.debug("Found %d devices in response", len(devices))
 
         for device in devices:
             if "deviceTypeName" in device and device["deviceTypeName"] in DEVICE_TYPES:
@@ -199,7 +253,7 @@ class API:
         sensors: dict[str, RadoffSensor] = {}
 
         url = f"{self.BASE_DOMAIN}/data/devices/{device_id}"
-        response = requests.get(
+        response = self.session.get(
             url,
             headers=self._get_headers(
                 bearer_token=self._get_bearer_token(), x_domain=self.domain
@@ -207,7 +261,7 @@ class API:
             timeout=self.DEFAULT_TIMEOUT,
         )
 
-        self._check_response_status(response=response)
+        self._check_response_status(response=response, url=url)
 
         result = response.json()
 
@@ -256,25 +310,66 @@ class API:
         """Get available domain."""
         url = f"{self.BASE_DOMAIN}/auth/user/me/domains"
 
-        response = requests.get(
+        response = self.session.get(
             url,
             headers=self._get_headers(
                 bearer_token=bearer_token, x_domain=self.PARENT_DOMAIN
             ),
             timeout=self.DEFAULT_TIMEOUT,
         )
+
+        if response.status_code != 200:
+            _LOGGER.error(
+                "Failed to get domains: status=%d, response=%s",
+                response.status_code,
+                response.text[:200]
+            )
+            return None
+
         resp_json = response.json()
         for domain in resp_json["domains"]:
             if domain["parentDomainId"] == self.PARENT_DOMAIN:
                 return domain["id"]
         return None
 
-    def _check_response_status(self, response: requests.Response):
+    def _check_response_status(self, response: requests.Response, url: str = ""):
+        """Check response status."""
         if response.status_code == 200:
             return True
-        self.disconnect()
-        self.connect()
-        raise APIAuthError("An error occurred while fetching new data")
+        
+        _LOGGER.warning(
+            "API request failed: status=%d, url=%s, response=%s",
+            response.status_code,
+            url or response.url,
+            response.text[:200]
+        )
+
+        if response.status_code == 401:
+            _LOGGER.info("Authentication token invalid (401), will reconnect on next request")
+            self.disconnect()
+            raise APIAuthError(
+                f"Authentication failed (HTTP 401 Unauthorized). Token may be expired."
+            )
+
+        elif response.status_code == 403:
+            raise APIAuthError(
+                f"Access forbidden (HTTP 403). Check account permissions."
+            )
+
+        elif response.status_code == 429:
+            raise APIAuthError(
+                f"API rate limit exceeded (HTTP 429). Please increase polling interval above 60 seconds."
+            )
+
+        elif response.status_code >= 500:
+            raise APIAuthError(
+                f"Radoff API server error (HTTP {response.status_code}). This is usually temporary - will retry automatically."
+            )
+
+        else:
+            raise APIAuthError(
+                f"API request failed with HTTP {response.status_code}: {response.text[:100]}"
+            )
 
 
 class APIAuthError(Exception):
