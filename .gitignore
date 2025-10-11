@@ -2,7 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+monitor_radoff.py
+radoff_debug_env
 # C extensions
 *.so
 

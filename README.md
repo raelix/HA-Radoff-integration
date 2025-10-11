@@ -5,6 +5,8 @@ Install this repository using HACS
 Currently supported devices:
 - Now+
 
+> Unfortunately I don't have any other Radoff device but I would be glad to extend this integration.
+
 ## Installation
 
 You can install it using HACS or manually.
@@ -37,9 +39,6 @@ Select the device you want to add.
 
 - ```username```
 - ```password```
-- ```client_id```
-- ```pool_id```
-- ```pool_region```
 
 ### Dev
 If you want to test out the integration just open it in 
