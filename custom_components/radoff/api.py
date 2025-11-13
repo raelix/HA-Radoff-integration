@@ -13,7 +13,7 @@ from requests.adapters import HTTPAdapter, Retry
 import time
 
 from homeassistant.components.sensor import DEVICE_CLASS_UNITS, SensorDeviceClass
-from homeassistant.const import UnitOfVolatileOrganicCompounds 
+from homeassistant.components.sensor import UnitOfVolatileOrganicCompounds
 from homeassistant.const import UnitOfPressure, UnitOfTemperature
 
 _LOGGER = logging.getLogger(__name__)
