@@ -13,7 +13,6 @@ from requests.adapters import HTTPAdapter, Retry
 import time
 
 from homeassistant.components.sensor import DEVICE_CLASS_UNITS, SensorDeviceClass
-from homeassistant.components.sensor import UnitOfVolatileOrganicCompounds
 from homeassistant.const import UnitOfPressure, UnitOfTemperature
 
 _LOGGER = logging.getLogger(__name__)
@@ -49,7 +48,7 @@ MAPPING: dict[str, dict[str, dict[str, Any]]] = {
         "tvoc": {
             "deviceClass": SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
             "friendlyName": "VOC",
-            "unit": UnitOfVolatileOrganicCompounds.MICROGRAMS_PER_CUBIC_METER,
+            "unit": "µg/m³"
             "normalize_fn": lambda value: round(float(value),1),  # V-lx → µg/m³
         },
         "eco2": {
