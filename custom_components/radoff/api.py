@@ -51,6 +51,7 @@ MAPPING: dict[str, dict[str, dict[str, Any]]] = {
             "unit": list(
                 DEVICE_CLASS_UNITS[SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS]
             )[0],
+            "normalize_fn": lambda value: round(float(value),1),  # V-lx → µg/m³
         },
         "eco2": {
             "deviceClass": SensorDeviceClass.CO2,
