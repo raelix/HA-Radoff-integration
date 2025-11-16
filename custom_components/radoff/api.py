@@ -1,3 +1,4 @@
+from homeassistant.const import UnitOfPressure, UnitOfTemperature
 """Class which represent the Radoff API."""
 
 from collections.abc import Callable
@@ -16,7 +17,7 @@ from homeassistant.components.sensor import DEVICE_CLASS_UNITS, SensorDeviceClas
 from homeassistant.const import CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
 from homeassistant.const import CONCENTRATION_PARTS_PER_MILLION 
 from homeassistant.const import PERCENTAGE 
-from homeassistant.const import UnitOfPressure.PA, UnitOfTemperature.CELSIUS
+from homeassistant.const import UnitOfPressure, UnitOfTemperature
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -87,7 +88,7 @@ MAPPING: dict[str, dict[str, dict[str, Any]]] = {
         "relative_humidity": {
             "deviceClass": SensorDeviceClass.HUMIDITY,
             "friendlyName": "Humidity",
-            "unit": PERCENTAGE
+            "unit": PERCENTAGE,
             "normalize_fn": lambda value: round(float(value),0)
         },
         "pressure": {
