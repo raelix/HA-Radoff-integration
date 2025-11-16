@@ -13,6 +13,9 @@ from requests.adapters import HTTPAdapter, Retry
 import time
 
 from homeassistant.components.sensor import DEVICE_CLASS_UNITS, SensorDeviceClass
+from homeassistant.const import CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
+from homeassistant.const import CONCENTRATION_PARTS_PER_MILLION 
+from homeassistant.const import PERCENTAGE 
 from homeassistant.const import UnitOfPressure, UnitOfTemperature
 
 _LOGGER = logging.getLogger(__name__)
@@ -48,45 +51,50 @@ MAPPING: dict[str, dict[str, dict[str, Any]]] = {
         "tvoc": {
             "deviceClass": SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
             "friendlyName": "VOC",
-            "unit": list(
-                DEVICE_CLASS_UNITS[SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS]
-            )[0],
+            "unit": CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+            "normalize_fn": lambda value: round(float(value),0)
         },
         "eco2": {
             "deviceClass": SensorDeviceClass.CO2,
             "friendlyName": "Co2",
-            "unit": list(DEVICE_CLASS_UNITS[SensorDeviceClass.CO2])[0],
+            "unit": CONCENTRATION_PARTS_PER_MILLION,
+            "normalize_fn": lambda value: round(float(value),0)
         },
         "pm10": {
             "deviceClass": SensorDeviceClass.PM10,
             "friendlyName": "PM10",
-            "unit": list(DEVICE_CLASS_UNITS[SensorDeviceClass.PM10])[0],
+            "unit": CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+            "normalize_fn": lambda value: round(float(value),0)
         },
         "pm25": {
             "deviceClass": SensorDeviceClass.PM25,
             "friendlyName": "PM2.5",
-            "unit": list(DEVICE_CLASS_UNITS[SensorDeviceClass.PM25])[0],
+            "unit": CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+            "normalize_fn": lambda value: round(float(value),0)
         },
         "pm1": {
             "deviceClass": SensorDeviceClass.PM1,
             "friendlyName": "PM1",
-            "unit": list(DEVICE_CLASS_UNITS[SensorDeviceClass.PM1])[0],
+            "unit": CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+            "normalize_fn": lambda value: round(float(value),0)
         },
         "internal_temperature": {
             "deviceClass": SensorDeviceClass.TEMPERATURE,
             "friendlyName": "Temperature",
             "unit": UnitOfTemperature.CELSIUS,
-            "normalize_fn": lambda value: round(float(value) * 0.00835, 1),
+            "normalize_fn": lambda value: round(float(value) * 0.00835, 1)
         },
         "relative_humidity": {
             "deviceClass": SensorDeviceClass.HUMIDITY,
             "friendlyName": "Humidity",
-            "unit": list(DEVICE_CLASS_UNITS[SensorDeviceClass.HUMIDITY])[0],
+            "unit": PERCENTAGE,
+            "normalize_fn": lambda value: round(float(value),0)
         },
         "pressure": {
             "deviceClass": SensorDeviceClass.PRESSURE,
             "friendlyName": "Pressure",
             "unit": UnitOfPressure.PA,
+            "normalize_fn": lambda value: round(float(value),0)
         },
         "airqualityindex": {
             "deviceClass": SensorDeviceClass.AQI,
