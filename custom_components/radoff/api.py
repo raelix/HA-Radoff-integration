@@ -1,4 +1,3 @@
-from homeassistant.const import UnitOfPressure, UnitOfTemperature
 """Class which represent the Radoff API."""
 
 from collections.abc import Callable
