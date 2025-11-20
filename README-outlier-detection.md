@@ -30,18 +30,18 @@ This version (v5) extends the original Radoff Now Home Assistant integration wit
 
 Used for general outlier detection based on change magnitude from the last valid value.
 
+```
 OUTLIER_THRESHOLDS: dict[str, float] = {
-"internal_temperature": 5.0, # Max 5°C change between readings
-"tvoc": 150.0, # Max 150 V-lx change
-"eco2": 500.0, # Max 500 ppm change
-"relative_humidity": 15.0, # Max 15% change
-"pm1": 50.0,
-"pm25": 50.0,
-"pm10": 50.0,
-"pressure": 1000.0, # Max 1000 Pa change
+	"internal_temperature": 5.0, # Max 5°C change between readings
+	"tvoc": 150.0, # Max 150 V-lx change
+	"eco2": 500.0, # Max 500 ppm change
+	"relative_humidity": 15.0, # Max 15% change
+	"pm1": 50.0,
+	"pm25": 50.0,
+	"pm10": 50.0,
+	"pressure": 1000.0, # Max 1000 Pa change
 }
-
-text
+```
 
 - These values can be tuned per sensor.
 - For TVOC, a relatively high threshold (150.0) is used so that legitimate large jumps (e.g. 196 → 96) are not suppressed.  
@@ -51,19 +51,13 @@ text
 
 Used for sensor-specific detection of “drops to zero / near-zero” from normal values.
 
+```
 ZERO_DROP_CONFIG: dict[str, dict[str, float]] = {
-"tvoc": {
-"low_threshold": 1.0, # Values below this are considered "zero"
-"normal_threshold": 20.0, # Previous value must be above this to trigger zero-drop detection
-},
-# Example for adding more:
-# "eco2": {
-# "low_threshold": 100.0,
-# "normal_threshold": 400.0,
-# },
+	"tvoc": {
+		"low_threshold": 1.0, # Values below this are considered "zero"
+		"normal_threshold": 20.0, # Previous value must be above this to trigger zero-drop detection
+	}
 }
-
-text
 
 **Effect for TVOC:**
 - If a reading goes from, for example, 70 → 0 or 225 → 0:
