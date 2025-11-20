@@ -2,7 +2,12 @@
 
 ## Overview
 
-This change extends the original Radoff Now Home Assistant integration with robust outlier handling, while keeping normal sensor behavior unchanged.
+This change extends the original Radoff Now Home Assistant integration with robust outlier handling, while keeping normal sensor behavior unchanged. The change was introduced due to some implausible readings from my TVOC and Temperature sensor. 
+
+- TVOC had some drops to 0, especially early mornings
+- Temperature sensor sometimes peaks to temperature readings above 50°C
+
+These readings are also stored in Radoff's IOT cloud and can be seen when downloading the data. It is unknown whether they are really transfered by the device or whether it is a flaw of the transfer of sensor data into the Radoff cloud. 
 
 **Key idea:**  
 - Normal readings are passed through as-is.  
@@ -13,7 +18,7 @@ This change extends the original Radoff Now Home Assistant integration with robu
 
 ## Changes compared to original code
 
-| Aspect | Original | v5 (this version) |
+| Aspect | Original | Outlier detection version (this version) |
 | --- | --- | --- |
 | Value processing | Raw sensor value is passed through | Raw value is used unless flagged as outlier |
 | Outlier detection | None | Hybrid: zero-drop rule + delta-threshold |
@@ -175,7 +180,7 @@ From your data:
 With `OUTLIER_THRESHOLDS["tvoc"] = 150.0`:
 
 - `change = 100.0 < 150.0` → **no outlier**.
-- v5 will pass this as a normal reading.
+- Outlier detection version will pass this as a normal reading.
 
 **Result:**
 - Sensor remains responsive to valid, large variations (e.g. airing a room, cooking, etc.).
