@@ -1,8 +1,8 @@
-# Radoff Now Sensor – Outlier Detection (v5)
+# Radoff Now Sensor – Outlier Detection
 
 ## Overview
 
-This version (v5) extends the original Radoff Now Home Assistant integration with robust outlier handling, while keeping normal sensor behavior unchanged.
+This change extends the original Radoff Now Home Assistant integration with robust outlier handling, while keeping normal sensor behavior unchanged.
 
 **Key idea:**  
 - Normal readings are passed through as-is.  
@@ -55,13 +55,7 @@ ZERO_DROP_CONFIG: dict[str, dict[str, float]] = {
 "tvoc": {
 "low_threshold": 1.0, # Values below this are considered "zero"
 "normal_threshold": 20.0, # Previous value must be above this to trigger zero-drop detection
-},
-# Example for adding more:
-# "eco2": {
-# "low_threshold": 100.0,
-# "normal_threshold": 400.0,
-# },
-}
+}}
 
 text
 
@@ -122,7 +116,7 @@ When no outlier is detected:
 
 ---
 
-## Examples (based on your data)
+## Examples
 
 ### 1) Temperature spike
 
@@ -136,7 +130,7 @@ When no outlier is detected:
 - Index: “good” → “terrible” → “good”  
 - Graph: Strong spike to 52°C.
 
-**v5 integration:**
+**Outlier detection integration:**
 - State: 20.5 → median(history) ≈ 20.5 → 20.8  
 - Index: consistent “good” readings  
 - Graph: No erroneous 52°C spike.
@@ -161,7 +155,7 @@ Example raw patterns:
 **Original integration:**
 - TVOC briefly drops to 0 → graph shows dips to 0 → misleading for interpretation.
 
-**v5 integration:**
+**Outlier detection integration:**
 - For these readings:
   - Marked as zero-drop outliers.
   - Replaced by median of recent valid TVOC values (e.g. around previous level).
@@ -218,55 +212,9 @@ All other behavior (device info, translation keys, index mapping, etc.) retains 
 
 ---
 
-## Installation
-
-1. **Backup original:**
-cp custom_components/radoff/sensor.py custom_components/radoff/sensor.py.backup
-
-text
-
-2. **Replace with v5:**
-- Save this file as `sensor.py` in `custom_components/radoff/`.
-
-3. **(Optional) Adjust thresholds:**
-- Edit `OUTLIER_THRESHOLDS` and `ZERO_DROP_CONFIG` to match your environment.
-- For TVOC, keep:
-  ```
-  "tvoc": 150.0
-  ```
-  and rely on `ZERO_DROP_CONFIG` to catch zero-drops.
-
-4. **Restart Home Assistant:**
-- Via UI: Developer Tools → Services → *Homeassistant: Restart*  
-- Or via shell:
-  ```
-  sudo systemctl restart home-assistant
-  ```
-
----
-
-## Logging and debugging
-
-Enable debug logging in `configuration.yaml`:
-
-logger:
-default: info
-logs:
-custom_components.radoff.sensor: debug
-
-text
-
-You will see:
-
-- Warnings for zero-drops and threshold outliers.
-- Info logs for median replacement.
-- Debug logs when index sensors are suppressed because base values were filtered.
-
----
-
 ## Summary
 
-v5 keeps your sensor behavior natural for normal operation, but:
+This change keeps your sensor behavior natural for normal operation, but:
 
 - Eliminates spurious TVOC zero readings.
 - Suppresses unrealistic spikes (e.g. 52°C).
