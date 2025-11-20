@@ -2,7 +2,7 @@
 
 ## Overview
 
-This change extends the original Radoff Now Home Assistant integration with robust outlier handling, while keeping normal sensor behavior unchanged. The change was introduced due to some implausible readings from my TVOC and Temperature sensor. 
+This change extends the original Radoff Now Home Assistant integration with robust outlier handling, while keeping normal sensor behavior unchanged. The change was introduced due to some implausible values in Home Assistant from my TVOC and Temperature sensor. 
 
 - TVOC had some drops to 0, especially early mornings
 - Temperature sensor sometimes peaks to temperature readings above 50°C
