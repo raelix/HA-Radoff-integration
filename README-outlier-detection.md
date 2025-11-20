@@ -58,6 +58,8 @@ ZERO_DROP_CONFIG: dict[str, dict[str, float]] = {
 		"normal_threshold": 20.0, # Previous value must be above this to trigger zero-drop detection
 	}
 }
+```
+
 
 **Effect for TVOC:**
 - If a reading goes from, for example, 70 → 0 or 225 → 0:
