@@ -99,7 +99,7 @@ INDEX_MAPPING: dict[str, dict[str, Any]] = {
 # Threshold definitions for outlier detection (sensor_key -> max_allowed_change_per_update)
 OUTLIER_THRESHOLDS: dict[str, float] = {
     "internal_temperature": 5.0,  # Max 5°C change between readings
-    "tvoc": 150.0,  # Max 150 V-lx change
+    "tvoc": 300.0,  # Max 300 V-lx change
     "eco2": 500.0,  # Max 500 ppm change
     "relative_humidity": 15.0,  # Max 15% change
     "pm1": 50.0,
