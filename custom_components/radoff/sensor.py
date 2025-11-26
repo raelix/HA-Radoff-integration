@@ -276,7 +276,13 @@ class RadoffSensor(CoordinatorEntity, SensorEntity):
                     drop_threshold,
                 )
                 return True
-
+                
+        _LOGGER.debug(
+            "No outlier detected in %s: %.2f to %.2f",
+            self.sensor_key,
+            last_valid,
+            current_value,
+        )
         return False
 
     @callback
@@ -323,7 +329,7 @@ class RadoffSensor(CoordinatorEntity, SensorEntity):
             val = int(raw_val) if isinstance(raw_val, int) else float(raw_val)
 
         # Apply outlier filter (uses shared state)
-        if self._outlier_filter_enabled:
+        if self._outlier_filter_enabled and not self._is_index:
             last_valid = _get_last_valid_value(self.device.device_id, self.sensor_key)
 
             # Initialize if first value
