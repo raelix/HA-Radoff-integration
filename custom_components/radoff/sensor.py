@@ -31,12 +31,12 @@ OUTLIER_FILTER_CONFIG = {
         "enabled": True,
     },
     "eco2": {
-        "spike_threshold": 400,  # ppm
+        "spike_threshold": 500,  # ppm
         "drop_threshold": None,
         "enabled": True,
     },
     "tvoc": {
-        "spike_threshold": 150,  # V-lx
+        "spike_threshold": 200,  # V-lx
         "drop_threshold": 5.0,   # V-lx
         "enabled": True,
     },
@@ -150,6 +150,21 @@ def _increment_filter_count(device_id: str, sensor_key: str) -> int:
         _FILTER_STATE[key]["count"] = _FILTER_STATE[key].get("count", 0) + 1
     return _FILTER_STATE[key]["count"]
 
+def _reset_consecutive_count(device_id: str, sensor_key: str) -> None:
+    """Reset the consecutive outlier counter."""
+    key = _get_filter_state_key(device_id, sensor_key)
+    if key in _FILTER_STATE:
+        _FILTER_STATE[key]["consecutive"] = 0
+
+def _increment_consecutive_count(device_id: str, sensor_key: str) -> int:
+    """Increment consecutive outlier counter and return new count."""
+    key = _get_filter_state_key(device_id, sensor_key)
+    if key not in _FILTER_STATE:
+        # Initialisieren, falls noch nicht vorhanden
+        _FILTER_STATE[key] = {"last_valid": None, "count": 0, "consecutive": 1}
+    else:
+        _FILTER_STATE[key]["consecutive"] = _FILTER_STATE[key].get("consecutive", 0) + 1
+    return _FILTER_STATE[key]["consecutive"]
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -335,22 +350,42 @@ class RadoffSensor(CoordinatorEntity, SensorEntity):
             # Initialize if first value
             if last_valid is None:
                 _set_last_valid_value(self.device.device_id, self.sensor_key, val)
+                _reset_consecutive_count(self.device.device_id, self.sensor_key)
+
             elif self._is_outlier(val):
-                # Return last valid value instead of outlier
-                filter_count = _increment_filter_count(self.device.device_id, self.sensor_key)
-                _LOGGER.info(
-                    "Filtering outlier for %s%s: using %.2f instead of %.2f (filter activation #%d)",
-                    self.sensor_key,
-                    "_index" if self._is_index else "",
-                    last_valid,
-                    val,
-                    filter_count,
-                )
-                val = last_valid
+                # Outlier detected
+                consecutive = _increment_consecutive_count(self.device.device_id, self.sensor_key)
+                
+                # if three consecutive outliers occur, we accept the value as the new truth
+                if consecutive >= 3:
+                    _LOGGER.warning(
+                        "Outlier persisted for %d readings in %s. Accepting new value %.2f as valid (prev: %.2f).",
+                        consecutive,
+                        self.sensor_key,
+                        val,
+                        last_valid
+                    )
+                    _set_last_valid_value(self.device.device_id, self.sensor_key, val)
+                    _reset_consecutive_count(self.device.device_id, self.sensor_key)
+                    # val ist nun der neue korrekte Wert
+                else:
+                    # Return last valid value instead of outlier
+                    filter_count = _increment_filter_count(self.device.device_id, self.sensor_key)
+                    _LOGGER.info(
+                        "Filtering outlier for %s%s: using %.2f instead of %.2f (filter activation #%d, consecutive #%d)",
+                        self.sensor_key,
+                        "_index" if self._is_index else "",
+                        last_valid,
+                        val,
+                        filter_count,
+                        consecutive
+                    )
+                    val = last_valid
             else:
-                # Update last valid value (only from main sensor, not index)
+                # Valid value - update last valid and reset counter
                 if not self._is_index:
                     _set_last_valid_value(self.device.device_id, self.sensor_key, val)
+                    _reset_consecutive_count(self.device.device_id, self.sensor_key)
 
         # For index sensors, compute index from the (potentially filtered) value
         if self._is_index:
