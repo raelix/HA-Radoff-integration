@@ -1,9 +1,14 @@
 """Constants for the radoff integration."""
 
+from datetime import timedelta
+
 DOMAIN = "radoff"
 CONF_POOL_ID = "pool_id"
 CONF_POOL_REGION = "pool_region"
 DEFAULT_SCAN_INTERVAL = 60
+# Sensor values are reported as unavailable when the cloud has not received
+# a payload from the device for longer than this.
+STALE_DATA_TIMEOUT = timedelta(minutes=10)
 MIN_SCAN_INTERVAL = 10
 CONF_INDEX = "generate_index"
 

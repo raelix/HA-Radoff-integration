@@ -2,6 +2,7 @@
 
 import logging
 from collections.abc import Callable
+from datetime import datetime
 from enum import StrEnum
 from numbers import Number
 from typing import Any
@@ -12,13 +13,15 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.util import dt as dt_util
 
 from .api import Device
-from .const import DOMAIN
+from .const import DOMAIN, STALE_DATA_TIMEOUT
 from .coordinator import RadoffCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -140,8 +143,31 @@ async def async_setup_entry(
                     )
                 )
 
+    for device in coordinator.data.devices:
+        sensors.append(RadoffLastDataSensor(coordinator, device))  # noqa: PERF401
+
     # Create the sensors.
     async_add_entities(sensors)
+
+
+def is_data_fresh(device: Device | None) -> bool:
+    """Return False when the cloud only has an outdated payload for the device."""
+    if device is None:
+        return False
+    if device.last_data_received is None:
+        # Older API responses without timestamp: keep the previous behaviour.
+        return True
+    return dt_util.utcnow() - device.last_data_received <= STALE_DATA_TIMEOUT
+
+
+def device_info_for(device: Device) -> DeviceInfo:
+    """Return the device info shared by all entities of a device."""
+    return DeviceInfo(
+        identifiers={(DOMAIN, device.device_serial)},
+        name=device.name,
+        manufacturer="Radoff",
+        model=device.device_type,
+    )
 
 
 class RadoffSensor(CoordinatorEntity, SensorEntity):
@@ -178,21 +204,28 @@ class RadoffSensor(CoordinatorEntity, SensorEntity):
     def _handle_coordinator_update(self) -> None:
         """Update sensor with latest data from coordinator."""
         _LOGGER.debug("Device: %s", self.device)
-        self.device = self.coordinator_context.get_device_by_id(
+        device = self.coordinator_context.get_device_by_id(
             self.device.device_type, self.device.device_id
         )
+        self._device_found = device is not None
+        if device is not None:
+            self.device = device
         self.async_write_ha_state()
+
+    @property
+    def available(self) -> bool:
+        """Return False when the device no longer delivers data to the cloud."""
+        return (
+            super().available
+            and getattr(self, "_device_found", True)
+            and self.sensor_key in self.device.sensors
+            and is_data_fresh(self.device)
+        )
 
     @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, self.device.device_serial)},
-            name=self.device.name,
-            manufacturer="Radoff",
-            model=self.device.device_type,
-            # model_id=self.device.device_id,
-        )
+        return device_info_for(self.device)
 
     @property
     def translation_key(self):
@@ -237,3 +270,34 @@ class RadoffSensor(CoordinatorEntity, SensorEntity):
             return f"{DOMAIN}-{self.device.device_id}-{self.device.sensors[self.sensor_key].name}"
         else:
             return f"{DOMAIN}-{self.device.device_id}-{self.device.sensors[self.sensor_key].name}-index"
+
+
+class RadoffLastDataSensor(CoordinatorEntity, SensorEntity):
+    """Timestamp of the last payload the Radoff cloud received from the device."""
+
+    _attr_has_entity_name = True
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_translation_key = "last_data_received"
+
+    def __init__(self, coordinator: RadoffCoordinator, device: Device) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self.device = device
+        self._attr_unique_id = f"{DOMAIN}-{device.device_id}-last_data_received"
+        self._attr_device_info = device_info_for(device)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Update sensor with latest data from coordinator."""
+        device = self.coordinator.get_device_by_id(
+            self.device.device_type, self.device.device_id
+        )
+        if device is not None:
+            self.device = device
+        self.async_write_ha_state()
+
+    @property
+    def native_value(self) -> datetime | None:
+        """Return the timestamp of the last received payload."""
+        return self.device.last_data_received

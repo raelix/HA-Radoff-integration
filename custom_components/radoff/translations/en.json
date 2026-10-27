@@ -110,6 +110,14 @@
           "poor": "Poor",
           "terrible": "Terrible"
         }
+      },
+      "last_data_received": {
+        "name": "Last data received"
+      }
+    },
+    "binary_sensor": {
+      "cloud_connection": {
+        "name": "Cloud connection"
       }
     }
   }
