@@ -88,6 +88,14 @@
           "poor": "Scarso",
           "terrible": "Pessimo"
         }
+      },
+      "last_data_received": {
+        "name": "Ultimi dati ricevuti"
+      }
+    },
+    "binary_sensor": {
+      "cloud_connection": {
+        "name": "Connessione cloud"
       }
     }
   },

@@ -2,6 +2,7 @@
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime
 from enum import StrEnum
 import logging
 from numbers import Number
@@ -12,8 +13,15 @@ import requests
 from requests.adapters import HTTPAdapter, Retry
 import time
 
-from homeassistant.components.sensor import DEVICE_CLASS_UNITS, SensorDeviceClass
-from homeassistant.const import UnitOfPressure, UnitOfTemperature
+from homeassistant.components.sensor import SensorDeviceClass
+from homeassistant.const import (
+    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+    CONCENTRATION_PARTS_PER_MILLION,
+    PERCENTAGE,
+    UnitOfPressure,
+    UnitOfTemperature,
+)
+from homeassistant.util import dt as dt_util
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -41,6 +49,8 @@ class Device:
     device_type: str
     name: str
     sensors: dict[str, RadoffSensor]
+    connected: bool | None = None
+    last_data_received: datetime | None = None
 
 
 MAPPING: dict[str, dict[str, dict[str, Any]]] = {
@@ -48,29 +58,27 @@ MAPPING: dict[str, dict[str, dict[str, Any]]] = {
         "tvoc": {
             "deviceClass": SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
             "friendlyName": "VOC",
-            "unit": list(
-                DEVICE_CLASS_UNITS[SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS]
-            )[0],
+            "unit": CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
         },
         "eco2": {
             "deviceClass": SensorDeviceClass.CO2,
             "friendlyName": "Co2",
-            "unit": list(DEVICE_CLASS_UNITS[SensorDeviceClass.CO2])[0],
+            "unit": CONCENTRATION_PARTS_PER_MILLION,
         },
         "pm10": {
             "deviceClass": SensorDeviceClass.PM10,
             "friendlyName": "PM10",
-            "unit": list(DEVICE_CLASS_UNITS[SensorDeviceClass.PM10])[0],
+            "unit": CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
         },
         "pm25": {
             "deviceClass": SensorDeviceClass.PM25,
             "friendlyName": "PM2.5",
-            "unit": list(DEVICE_CLASS_UNITS[SensorDeviceClass.PM25])[0],
+            "unit": CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
         },
         "pm1": {
             "deviceClass": SensorDeviceClass.PM1,
             "friendlyName": "PM1",
-            "unit": list(DEVICE_CLASS_UNITS[SensorDeviceClass.PM1])[0],
+            "unit": CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
         },
         "internal_temperature": {
             "deviceClass": SensorDeviceClass.TEMPERATURE,
@@ -81,7 +89,7 @@ MAPPING: dict[str, dict[str, dict[str, Any]]] = {
         "relative_humidity": {
             "deviceClass": SensorDeviceClass.HUMIDITY,
             "friendlyName": "Humidity",
-            "unit": list(DEVICE_CLASS_UNITS[SensorDeviceClass.HUMIDITY])[0],
+            "unit": PERCENTAGE,
         },
         "pressure": {
             "deviceClass": SensorDeviceClass.PRESSURE,
@@ -237,7 +245,9 @@ class API:
 
         for device in devices:
             if "deviceTypeName" in device and device["deviceTypeName"] in DEVICE_TYPES:
-                sensors = self._get_data(device["id"])
+                sensors, connected, last_data_received = self._get_data(
+                    device["id"]
+                )
                 device_list.append(
                     Device(
                         device_id=device["id"],
@@ -245,11 +255,15 @@ class API:
                         device_type=device["deviceTypeName"],
                         name=device["name"],
                         sensors=sensors,
+                        connected=connected,
+                        last_data_received=last_data_received,
                     )
                 )
         return device_list
 
-    def _get_data(self, device_id: str):
+    def _get_data(
+        self, device_id: str
+    ) -> tuple[dict[str, RadoffSensor], bool | None, datetime | None]:
         sensors: dict[str, RadoffSensor] = {}
 
         url = f"{self.BASE_DOMAIN}/data/devices/{device_id}"
@@ -266,6 +280,17 @@ class API:
         result = response.json()
 
         _LOGGER.debug("Radoff poll data are: %s", result["data"])
+
+        # The cloud keeps serving the last payload it received, even when the
+        # device has been offline for hours. Expose the connection flag and the
+        # timestamp of the last payload so stale values can be detected.
+        connected = result["data"].get("connected")
+        if not isinstance(connected, bool):
+            connected = None
+        last_data_received = None
+        raw_ts = result["data"].get("lastDataReceivedAt")
+        if raw_ts:
+            last_data_received = dt_util.parse_datetime(raw_ts)
 
         for k, v in MAPPING.items():
             if k in result["data"]:
@@ -289,7 +314,7 @@ class API:
                             normalize_fn=fn,
                         )
 
-        return sensors
+        return sensors, connected, last_data_received
 
     def _get_bearer_token(self):
         if self.tokens is not None and "IdToken" in self.tokens:
