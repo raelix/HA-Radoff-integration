@@ -23,7 +23,7 @@
   },
   "entity": {
     "sensor": {
-      "airqualityindex": {
+      "aqi_value": {
         "name": "Air Quality"
       },
       "eco2": {
