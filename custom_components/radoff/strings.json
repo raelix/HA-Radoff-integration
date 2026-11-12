@@ -10,7 +10,7 @@
       "pressure": {
         "name": "Pressure"
       },
-      "airqualityindex": {
+      "aqi_value": {
         "name": "Air Quality"
       },
       "eco2": {
