@@ -16,7 +16,7 @@
       "tvoc": {
         "name": "VOCs"
       },
-      "airqualityindex": {
+      "aqi_value": {
         "name": "Qualità aria"
       },
       "internal_temperature_index": {
